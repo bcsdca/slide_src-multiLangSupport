@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bible Selector</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      padding: 20px;
+      background: linear-gradient(135deg, #a8e6cf, #dcedc1);
+      color: #333;
+      height: 100%;
+      margin: 0;
+      overflow-y: auto;
+    }
+
+    /* 🔵 First container (AI Tool + Language) */
+    .blue-container {
+      max-width: 600px;
+      margin: 0 auto 20px auto;
+      padding: 15px 20px;
+      border-radius: 15px;
+      background-color: #e3f2fd;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    /* 🟢 Second container (Bible selection) */
+    .green-container {
+      max-width: 600px;
+      margin: 0 auto 20px auto;
+      padding: 15px 20px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(10px);
+    }
+
+    label {
+      font-weight: 600;
+      color: #34495e;
+      display: block;
+      margin: 12px 0 6px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+      background-color: #f9f9f9;
+      color: #333;
+      transition: box-shadow 0.2s ease;
+    }
+
+    select:focus {
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+      outline: none;
+    }
+
+    .indented {
+      margin-left: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    /* 🎯 Floating centered Submit button */
+    .button-container {
+      text-align: center;
+      margin-top: 25px;
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: slideIn 1s ease forwards;
+      animation-delay: 0.3s;
+    }
+
+    @keyframes slideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .button-container button {
+      padding: 14px 60px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .button-container button:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    .button-container button:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .verse-group {
+       display: flex;
+       gap: 8px;
+     }
+
+    .verse-number {
+       flex: 2.5;
+    }
+
+    .verse-suffix {
+      flex: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      select,
+      button {
+        font-size: 14px;
+      }
+
+      .button-container button {
+        width: 80%;
+        padding: 12px;
+        font-size: 16px;
+      }
+    }
+
+    #from-chapter,
+    #from-verse {
+      background-color: #f0f8ff;
+      border: 2px solid #00bfff;
+    }
+
+    #to-chapter,
+    #to-verse {
+      background-color: #ffe4e1;
+      border: 2px solid #ff7f7f;
+    }
+
+    #bible-book {
+      color: #1B5E20;
+      background-color: #f0f8ff;
+      font-weight: bold;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-spinner {
+      border: 3px solid rgba(255, 0, 0, 0.3);
+      border-top: 3px solid red;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 6px auto;
+    }
+
+    /* 🟡 Status / message area */
+    #result-message {
+      text-align: center;
+      font-size: 1em;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    /* ✨ Make loading message more visible and animated */
+    #result-message.loading {
+      font-size: 1.1em;
+      background: linear-gradient(90deg, #ff9800, #ffc107, #ff9800);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: pulseGlow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+      0% {
+        text-shadow: 0 0 4px rgba(255, 193, 7, 0.4);
+      }
+
+      50% {
+        text-shadow: 0 0 14px rgba(255, 193, 7, 0.8);
+      }
+
+      100% {
+        text-shadow: 0 0 4px rgba(255, 193, 7, 0.4);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 🔵 Blue container -->
+  <div class="blue-container">
+    <label for="language-select">Choose Language for Google Slide:</label>
+    <select id="language-select">
+      <option value="">-- Please Select Language --</option>
+      <option value="english">English</option>
+      <option value="chinese">Chinese</option>
+      <option value="bilingualChineseFirst">
+        Bilingual (Chinese First)
+      </option>
+      <option value="bilingualEnglishFirst">
+        Bilingual (English First)
+      </option>
+    </select>
+    
+    <label for="font-profile-select">Choose Font Size:</label>
+    <select id="font-profile-select">
+      <option value="">-- Please Select Font Size --</option>
+      <option value="large">Large</option>
+      <option value="medium">Medium</option>
+      <option value="small">Small</option>
+    </select>
+  </div>
+
+  <!-- 🟢 Green container -->
+  <div class="green-container">
+    <label for="bible-book">Select Bible Book:</label>
+    <select id="bible-book" onchange="updateChapters()" disabled>
+      <option value="">Loading...</option>
+    </select>
+
+    <label for="from-chapter">From Chapter:</label>
+    <select id="from-chapter" onchange="updateFromVerses(); updateToChapter();">
+      <option value="">-- Please Select Chapter --</option>
+    </select>
+    
+    <div class="form-group indented">
+      <label for="from-verse">From Verse:</label>
+
+      <div class="verse-group">
+        <select id="from-verse" class="verse-number">
+          <option value="">-- Please Select Verse --</option>
+        </select>
+
+        <select id="from-verse-suffix" class="verse-suffix">
+          <option value="">(Full Verse)</option>
+          <option value="a">a</option>
+          <option value="b">b</option>
+        </select>
+      </div>
+
+    </div>
+
+    <label for="to-chapter">To Chapter:</label>
+    <select id="to-chapter" onchange="updateToVerses()">
+      <option value="">-- Please Select Chapter --</option>
+    </select>
+   
+    <div class="form-group indented">
+      <label for="to-verse">To Verse:</label>
+
+      <div class="verse-group">
+        <select id="to-verse" class="verse-number">
+          <option value="">-- Please Select Verse --</option>
+        </select>
+
+        <select id="to-verse-suffix" class="verse-suffix">
+          <option value="">(Full Verse)</option>
+          <option value="a">a</option>
+          <option value="b">b</option>
+        </select>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- 🎯 Floating centered Submit button -->
+  <div class="button-container">
+    <button onclick="submitSelection()">Submit</button>
+  </div>
+
+  <section id="result-message" role="alert" style="display: none;"></section>
+
+  <script>
+    let bibleBooks = {};
+
+    window.addEventListener("load", () => {
+      google.script.run
+      .withSuccessHandler((data) => {
+        const ChineseBibleBookOrder = data.ChineseBibleBookOrder;
+        const ChineseBibleEachChapterLength = data.ChineseBibleEachChapterLength;
+        const chineseToEnglishMap = data.chineseToEnglishMap;
+        bibleBooks = ChineseBibleEachChapterLength;
+        const dropdown = document.getElementById("bible-book");
+        dropdown.innerHTML = '<option value="">-- Please Select --</option>';
+        if (ChineseBibleBookOrder) {
+          ChineseBibleBookOrder.forEach(bookName => {
+          const option = document.createElement("option");
+          option.value = bookName;
+          const eng = chineseToEnglishMap[bookName] || "";
+          const displayEng = eng.replace(/\b\w/g, c => c.toUpperCase());
+          option.textContent = `${bookName} (${displayEng})`;
+          dropdown.appendChild(option);
+          });
+        dropdown.disabled = false;
+        }
+      })
+    .getChineseBibleBookInfo();
+    });
+
+    function updateChapters() {
+      const book = document.getElementById('bible-book').value;
+      const fromChapterSelect = document.getElementById('from-chapter');
+      const toChapterSelect = document.getElementById('to-chapter');
+      const reset = '<option value="">-- Please Select Chapter --</option>';
+      fromChapterSelect.innerHTML = reset;
+      toChapterSelect.innerHTML = reset;
+      document.getElementById('from-verse').innerHTML = '<option value="">-- Please Select Verse --</option>';
+      document.getElementById('to-verse').innerHTML = '<option value="">-- Please Select Verse --</option>';
+
+      if (book && bibleBooks[book]) {
+        const chapters = bibleBooks[book];
+        for (let i = 1; i <= chapters.length; i++) {
+          fromChapterSelect.innerHTML += `<option value="${i}">${i}</option>`;
+          toChapterSelect.innerHTML += `<option value="${i}">${i}</option>`;
+        }
+      }
+    }
+
+    function updateFromVerses() {
+      const book = document.getElementById('bible-book').value;
+      const chapter = document.getElementById('from-chapter').value;
+      const fromVerseSelect = document.getElementById('from-verse');
+      fromVerseSelect.innerHTML = '<option value="">-- Please Select Verse --</option>';
+
+      if (book && chapter && bibleBooks[book]) {
+        const verses = bibleBooks[book][chapter - 1];
+        for (let i = 1; i <= verses; i++) {
+          fromVerseSelect.innerHTML += `<option value="${i}">${i}</option>`;
+        }
+      }
+    }
+
+    function updateToChapter() {
+      const fromChapterSelect = document.getElementById('from-chapter');
+      const toChapterSelect = document.getElementById('to-chapter');
+      toChapterSelect.value = fromChapterSelect.value;
+      updateToVerses();
+    }
+
+    function updateToVerses() {
+      const book = document.getElementById('bible-book').value;
+      const chapter = document.getElementById('to-chapter').value;
+      const toVerseSelect = document.getElementById('to-verse');
+      toVerseSelect.innerHTML = '<option value="">-- Please Select Verse --</option>';
+
+      if (book && chapter && bibleBooks[book]) {
+        const verses = bibleBooks[book][chapter - 1];
+        for (let i = 1; i <= verses; i++) {
+          toVerseSelect.innerHTML += `<option value="${i}">${i}</option>`;
+        }
+      }
+    }
+
+    function submitSelection() {
+      const languageChosen = document.getElementById('language-select').value;
+      const fontProfile = document.getElementById('font-profile-select').value;
+      const book = document.getElementById('bible-book').value;
+      const fromChapter = parseInt(document.getElementById('from-chapter').value);
+      const toChapter = parseInt(document.getElementById('to-chapter').value);
+      const resultMessage = document.getElementById('result-message');
+      
+      const fromVerseNum = document.getElementById('from-verse').value;
+      const fromSuffix = document.getElementById('from-verse-suffix').value;
+      const toVerseNum = document.getElementById('to-verse').value;
+      const toSuffix = document.getElementById('to-verse-suffix').value;
+      const fromVerse = fromVerseNum + fromSuffix; // e.g. "5a"
+      const toVerse = toVerseNum + toSuffix;       // e.g. "10b"
+
+      resultMessage.innerText = "";
+      resultMessage.style.display = "none";
+      resultMessage.classList.remove("loading");
+      
+      if (!languageChosen) {
+        alert('Please select a language.');
+        return;
+      }
+
+      if (!fontProfile) {
+        alert('Please select a font size.');
+        return;
+      }
+
+      if (book && fromChapter && fromVerseNum && toChapter && toVerseNum) {
+        if (fromChapter > toChapter) {
+          alert("Invalid range: 'To Chapter' is smaller than 'From Chapter'.");
+        } else if (fromChapter === toChapter && parseInt(fromVerseNum) > parseInt(toVerseNum)) {
+          alert("Invalid range: 'To Verse' is smaller than 'From Verse' within same chapter.");
+        } else {
+          alert(`You selected: ${book} ${fromChapter}:${fromVerse} to ${book} ${toChapter}:${toVerse} in ${languageChosen} with ${fontProfile} font size.`);
+
+          const p = {
+            book,
+            from_chapter: fromChapter,
+            from_verse: fromVerse, // now "5a"
+            to_chapter: toChapter,
+            to_verse: toVerse      // now "10b"
+          };
+
+          google.script.run
+            .withSuccessHandler(onSuccess)
+            .withFailureHandler(onFailure)
+            .run_createPassageUsingJSONBible(p, languageChosen, fontProfile);
+
+          resultMessage.innerHTML = '<div class="loading-spinner"></div> Processing Bible passage... Please wait...';
+          resultMessage.classList.add("loading");
+          resultMessage.style.display = "block";
+        }
+      } else {
+        alert('Please select all Bible chapters and verses.');
+      }
+    }
+
+    function onSuccess(response) {
+      const resultMessage = document.getElementById('result-message');
+      resultMessage.classList.remove("loading");
+      resultMessage.innerHTML = "✅ Bible Passage processed successfully!";
+      resultMessage.style.color = "green";
+      resultMessage.style.display = "block";
+      alert(`Server Response: ${response}`);
+    }
+
+    function onFailure(error) {
+      const resultMessage = document.getElementById('result-message');
+      resultMessage.classList.remove("loading");
+      resultMessage.innerHTML = "❌ An error occurred while processing. Please try again.";
+      resultMessage.style.color = "red";
+      resultMessage.style.display = "block";
+      console.error("Failed to execute run_createPassageUsingJSONBible:", error);
+      alert("There was an error: " + error.message);
+    }
+  </script>
+</body>
+
+</html>

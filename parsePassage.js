@@ -63,7 +63,7 @@ function parsePassage(passage) {
         var startChapter = parseInt(chapterNumber, 10); // Convert to integer if it's not already
         var endChapter = parseInt(extractDigitsBeforeIndex(verseNumber.indexOf(":"), verseNumber));
         var startChapterStartVerse = extractDigitsBeforeIndex(verseNumber.indexOf("-"), verseNumber);
-        var startChapterEndVerse = end_verse(bookName + " " + chapterNumber);
+        var startChapterEndVerse = getLastVerseOfChapter(bookName, chapterNumber);
         var endChapterStartVerse = 1;
         var endChapterEndVerse = verseNumber.substring((verseNumber.indexOf(":")) + 1);
 

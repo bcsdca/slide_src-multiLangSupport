@@ -23,12 +23,12 @@ function createPassageUsingJSONBible(p, languageChosen, fontProfile) {
     //extractPassageUsingLocalBible will add 1 to passage_start_row_to_insert before it do the insert
     var passage_start_row_to_insert = 1;
 
-    //extractMultiLanguagePassage(passageInput, sheet, startingRow, languageChosen, provider, usingJSONBible)
+    //extractBilingualPassage(passageInput, sheet, startingRow, languageChosen, provider, usingJSONBible)
     //provider input is needed only if we are not json bible to extract passage
     //povider input is used to decide which AI to used to extract bible passage
     //"deepseek" is just a place holder here
     //forcing usingJSONBible = true
-    const PassageRowsUsed = extractMultiLanguagePassage(p, sheet, passage_start_row_to_insert, languageChosen, "deepseek", true, fontProfile);
+    const PassageRowsUsed = extractBilingualPassage(p, sheet, passage_start_row_to_insert, languageChosen, "deepseek", true, fontProfile);
     logMessage(`${getCallStackTrace()}: PassageRowsUsed = ${PassageRowsUsed}, for inserting passage ${JSON.stringify(p, null, 2)}`);
 
     //then create the scripture passage ppt

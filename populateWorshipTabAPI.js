@@ -37,7 +37,7 @@ function populateWorshipTabAPI(provider = "deepseek", language = "chinese", isTe
   if ((!worshipInfo || !worshipInfo.attachment || !worshipInfo.scriptureReading || !worshipInfo.sermon ||
     !worshipInfo.speaker || !worshipInfo.annoArray || worshipInfo.annoArray.length === 0)) {
     if (isTesting) {
-      logMessage(`${getCallStackTrace()}: Missing worship info, exiting (testing mode).`);
+      logMessage(`${getCallStackTrace()}: Missing worship info, exiting because it is testing mode`);
     } else {
       handleMissingInfo(provider);
     }
@@ -49,12 +49,14 @@ function populateWorshipTabAPI(provider = "deepseek", language = "chinese", isTe
 
   if (!invocationPassages || !Array.isArray(invocationPassages) || invocationPassages.length === 0) {
     if (isTesting) {
-      logMessage(`${getCallStackTrace()}: Missing invocation info, exiting (testing mode).`);
+      logMessage(`${getCallStackTrace()}: Missing invocation info, but continue because it is in testing mode`);
     } else {
       handleMissingInfo(provider);
+      logMessage(`${getCallStackTrace()}: Missing invocation info, exiting because it is running in normal mode`);
+      safeExit();
+      return;
     }
-    safeExit();
-    return;
+    
   }
 
   logMessage(`${getCallStackTrace()}: Invocation passages: ${JSON.stringify(invocationPassages, null, 2)}`);
@@ -80,12 +82,12 @@ function populateWorshipTabAPI(provider = "deepseek", language = "chinese", isTe
 
   try {
     invocationPassages.forEach((passage) => {
-      const used = extractMultiLanguagePassage(passage, sheet, invoRowToInsert, language, provider, usingJSONBible, fontProfile);
+      const used = extractBilingualPassage(passage, sheet, invoRowToInsert, language, provider, usingJSONBible, fontProfile);
       invoRowToInsert += used;
 
     });
   } catch (err) {
-    logMessageError(`${getCallStackTrace()}: Error in calling extractMultiLanguagePassage function: ` + err);
+    logMessageError(`${getCallStackTrace()}: Error in calling extractBilingualPassage function: ` + err);
     safeExit();
     //dont return if there is invocation problem
     //return;
@@ -113,7 +115,7 @@ function populateWorshipTabAPI(provider = "deepseek", language = "chinese", isTe
   flushLogsToSheet();
 
   // ✅ Run createWorshipSlide ONLY if everything above succeeded
-  createWorshipSlideAndSendEmail(comingSundayStr,fontProfile)
+  createWorshipSlideAndSendEmail(comingSundayStr, fontProfile)
 
   //remove all triggers
   toggleTrigger("disable", provider)
@@ -159,7 +161,7 @@ function getPPTAssigneeInfo(comingSundayStr) {
   throw new Error(`No row found for date: ${comingSundayStr}`);
 }
 
-function createWorshipSlideAndSendEmail(comingSundayStr,fontProfile) {
+function createWorshipSlideAndSendEmail(comingSundayStr, fontProfile) {
 
   try {
     logMessage(`${getCallStackTrace()}: Calling createWorshipSlide...`);
@@ -263,7 +265,7 @@ function processScriptureReadingAPI(provider, scriptureReading, srRowToInsert, s
   }
 
   // 🔄 Unified call — dynamically switch depending on provider
-  const scriptureReadingPassageRowsUsed = extractMultiLanguagePassage(
+  const scriptureReadingPassageRowsUsed = extractBilingualPassage(
     scriptureReadingPassage,
     sheet,
     srRowToInsert,

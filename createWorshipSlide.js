@@ -3,7 +3,7 @@ function createWorshipSlide(fontProfile) {
   SpreadsheetApp.getActive().toast("Creating Slides for this Sunday's worship... Please wait.", "Processing...", -1); // Show a persistent toast
 
   clearLogSheet();
-
+ 
   const worshipSourceMap = {
     large: worshipLargeSrcId,
     medium: worshipMediumSrcId,

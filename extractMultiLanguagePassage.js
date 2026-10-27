@@ -5,7 +5,7 @@
  * @returns {number} Total number of rows used.
  */
 
-function extractMultiLanguagePassage(
+/*function extractMultiLanguagePassage(
   passageInput,
   sheet,
   startingRow,
@@ -31,14 +31,9 @@ function extractMultiLanguagePassage(
       `${getCallStackTrace()}: Inserting to row ${startingRow} of the google sheet`
     );
 
-    passageInput =
-      passageInput.replace(/[*]+/g, "").trim();
-
-    const passages =
-      passageInput
-        .split(/[;；]/)
-        .map(p => p.trim())
-        .filter(p => p.length > 0);
+        
+    //split due to ; or , as long as there are 2 book names
+    const passages = splitPassage(passageInput)
 
     const normalizedPassages =
       normalizePassages(passages);
@@ -331,22 +326,7 @@ function insertVerseToSheet(sheet, startingRow, passage, verseBlock) {
   }
 }
 
-/**
- * Clean redundant Bible passage references.
- *
- * Examples:
- * "John 3:16-16"
- *   → "John 3:16"
- *
- * "John 3:16-3:16"
- *   → "John 3:16"
- *
- * "John 3:16a-16a"
- *   → "John 3:16a"
- *
- * "John 3:16b-16b"
- *   → "John 3:16b"
- */
+
 function cleanPassage(passage) {
 
   return passage.replace(
@@ -376,3 +356,4 @@ function cleanPassage(passage) {
     }
   );
 }
+*/

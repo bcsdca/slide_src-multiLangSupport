@@ -55,29 +55,71 @@ function getOldestAnnouncementNumbersAPI(message, provider = "gemini") {
  * Provider-specific prompt builder for announcements.
  */
 function buildAnnouncementPrompt(provider, oldestMessageTruncated) {
-const basePrompt = `
-Extract ONLY the valid announcement numbers from the bulletin text below.
+  const basePrompt = `
+You are a deterministic text extraction engine.
 
-CRITICAL DEFINITIONS:
-- Some announcements are written as a numbered list (e.g., "1.", "2.") but the REAL announcement number is the number that appears AFTER a "#" symbol.
-- The leading list number (e.g., "1.", "2.") is NOT an announcement number and must be ignored.
+Task:
+Extract ONLY the bulletin announcement numbers that the MC is asked to highlight.
+
+IMPORTANT:
+The text may come from email or PDF extraction.
+Line breaks, spacing, and "*" characters may be unreliable.
+
+There are TWO valid formats.
+
+FORMAT A:
+1. # 2 長青團契
+2. # 3 主任牧師聘牧委員會
+
+For FORMAT A:
+- The leading number before "#" is only a list position.
+- The REAL announcement number is the number AFTER "#".
+- Therefore:
+  "1. # 2 ..." = announcement 2
+  "2. # 3 ..." = announcement 3
+
+FORMAT B:
+1. # 粵語部傳道聘牧最近消息
+2. # 新的秋季主日學
+3. # 宣教主日午餐會
+4. # 科技業求職與職涯發展策略講座
+
+For FORMAT B:
+- There is NO number after "#".
+- Therefore the leading number before "." IS the announcement number.
+- Thus the examples above represent announcements 1, 2, 3, and 4.
+
+DECISION RULE:
+For each item containing "#":
+
+1. If "#" is followed by a number:
+   use the number AFTER "#".
+
+2. If "#" is NOT followed by a number:
+   use the leading number BEFORE ".".
 
 RULES:
-1. Ignore all "*" characters.
-2. Only consider lines that start at the beginning of a line.
-3. A valid announcement line:
-   - May start with a list index like "1." or "2.", which must be ignored.
-   - MUST contain a "#" followed immediately by a number (e.g., "# 2", "#3").
-4. Extract ONLY the number that appears after "#".
-5. Ignore any numbers that:
-   - Appear in parentheses.
-   - Appear within sentences.
-   - Appear after words like "Announcement", "AV", "Audio-Visual", "MC", or "Thanks".
-6. Stop processing entirely once you reach any section mentioning "AV", "Audio-Visual", "MC", or "Thanks".
-7. Do NOT infer, renumber, or assume missing values.
-8. Return strictly in JSON format and nothing else:
+1. Ignore all "*" characters and decorative formatting.
+2. Look only at the MC / "Please highlight" announcement section.
+3. Do NOT depend on line breaks.
+4. Do NOT extract dates, Bible verse numbers, phone numbers, or numbers from normal sentences.
+5. Stop when reaching closing text such as:
+   "AV",
+   "Audio-Visual",
+   "Thanks",
+   "In His service",
+   "By His Grace".
+6. Do NOT infer or invent numbers.
+7. Preserve the order in which announcement numbers appear.
+8. If none are found, return an empty array.
 
-{ "numbers": [2, 3] }
+Return ONLY JSON in this structure:
+
+{ "numbers": [] }
+
+Put the extracted announcement numbers inside the array.
+Do NOT copy the example values from this prompt.
+Do NOT include explanations or markdown.
 
 CONTENT:
 ${oldestMessageTruncated}

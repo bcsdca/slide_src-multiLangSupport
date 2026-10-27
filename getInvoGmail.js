@@ -4,30 +4,33 @@ function getInvoGmail(isTesting) {
     const { worshipQuery, cantQuery } = getQueries(isTesting); // pass false for normal
     logMessage(`${getCallStackTrace()}: cantQuery = ${cantQuery}, with isTesting = ${isTesting} `);
     const cantThreads = GmailApp.search(cantQuery);
-    //logMessage(`${getCallStackTrace()}: Total # of threads = ${cantThreads.length} for Cantonese worship reminder email`);
     
-
     // Check if any threads are found
     if (cantThreads.length === 0) {
-      logMessage(`${getCallStackTrace()}: No threads found.`);
+      logMessage(`${getCallStackTrace()}: No Cantonese worship reminder email thread found.`);
       return null;  // Return null when no threads are found
     }
-
+    
     // Get the latest thread
-    const latestThread = cantThreads[0];
+    const latestThread = cantThreads.reduce((latest, thread) =>
+      thread.getLastMessageDate() > latest.getLastMessageDate() ? thread : latest
+    );
+
+    const latestSubject = latestThread.getFirstMessageSubject();  
+    logMessage(getCallStackTrace() + `: The Cantonese worship reminder email subject found is "${latestSubject}"`); 
+    
     const messages = latestThread.getMessages();
     const messageLength = messages.length;
-    logMessage(getCallStackTrace() + `: The Cantonese worship reminder email subject found is ${latestThread.getMessages()[0].getSubject()}", and it's email message length is ${messageLength}`);
-
-    let emailContent = "";
+    
+    var cantEmailContent = "";
 
     // Combine all messages into one (without extra newlines)
     for (let j = 0; j < messageLength; j++) {
-      emailContent = messages[j].getPlainBody().concat(emailContent);
+      cantEmailContent = messages[j].getPlainBody().concat(cantEmailContent);
     }
 
-    logMessage(`${getCallStackTrace()}: Extracted email content = ${emailContent}`);
-    return emailContent;
+    logMessage(`${getCallStackTrace()}: Extracted Cantonese worship reminder email content = ${cantEmailContent}`);
+    return cantEmailContent;
 
   } catch (error) {
     logMessage(`${getCallStackTrace()}: Error = ${error}`);

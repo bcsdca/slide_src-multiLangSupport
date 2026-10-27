@@ -1,4 +1,4 @@
-function passageCapture(
+/*function passageCapture(
   p,
   languageChosen,
   provider,
@@ -106,9 +106,9 @@ function passageCapture(
           language
         );
 
-    // =====================================================
-    // USING AI
-    // =====================================================
+      // =====================================================
+      // USING AI
+      // =====================================================
 
     } else {
 
@@ -194,28 +194,15 @@ function passageCapture(
           // =====================================
 
           logMessageError(
-            `${getCallStackTrace()}: JSON parse failed, falling back to text parsing`
+            `${getCallStackTrace()}: JSON parse failed, falling back to using JSON bible`
           );
 
-          results = reply
-            .replace(
-              /^[\s\S]*?(?=\d+(?:[abAB上下])?\s)/,
-              ""
-            )
-            .split("\n")
-            .filter(line =>
-              /^\d+/.test(
-                line.trim()
-              )
-            )
-            .map(line =>
-              line
-                .replace(/\*/g, "")
-                .replace(/（細拉）[。.]?/g, "")
-                .replace(/^\s*(\d+)上/, "$1a")
-                .replace(/^\s*(\d+)下/, "$1b")
-                .trim()
+          results =
+            fetchPassageFromJsonBible(
+              input,
+              language
             );
+           
         }
 
         // =========================================
@@ -440,4 +427,4 @@ function fetchPassageFromJsonBible(
   }
 
   return results;
-}
+}*/

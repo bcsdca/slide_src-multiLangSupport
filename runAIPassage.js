@@ -54,6 +54,9 @@ function runAIPassage(AIToolChosen, prompt) {
           { role: "system", content: "You are a helpful assistant." },
           { role: "user", content: prompt }
         ],
+        thinking: {
+          type: "disabled"
+        },
         temperature: 0.2,
         max_tokens: 2048
       };

@@ -1,4 +1,4 @@
-/*function testGeminiSimple() {
+function testGeminiSimple() {
   const prompt = "Translate 'God is love' into Traditional Chinese (CUVMPT Bible style).";
   const result = callGemini(prompt);
   logMessage(`${getCallStackTrace()}: ${result}`);
@@ -50,4 +50,4 @@ function listGeminiModels() {
   const text = response.getContentText();
   logMessage(`${getCallStackTrace()}: List Models Response:\n" + ${text}`);
 }
-*/
+

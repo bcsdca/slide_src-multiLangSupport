@@ -1,10 +1,10 @@
 function run_deepseek() {
   logMessage(`${getCallStackTrace()}: === Running populateWorshipTabAPI using deepseek API===`);
 
-  const isTesting = true;
-  const usingJSONBible = false;
+  const isTesting = false;
+  const usingJSONBible = true;
   const provider = "deepseek";
-  const language = "bilingualChineseFirst";
+  const language = "bilingualEnglishFirst";
   const fontProfile = "large";
   //const fontProfile = "small";
   

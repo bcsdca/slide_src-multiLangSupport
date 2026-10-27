@@ -51,10 +51,18 @@ function runAllAI(AIToolChosen, prompt) {
       payload = {
         model: deepSeekModel,
         messages: [
-          { role: "system", content: "You are a helpful assistant." },
-          { role: "user", content: prompt }
+          {
+            role: "system",
+            content: "You are a deterministic text extraction engine."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
         ],
-        temperature: 0.2,
+        thinking: {
+          type: "disabled"
+        },
         max_tokens: 1024
       };
       headers = {
